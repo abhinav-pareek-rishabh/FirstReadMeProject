@@ -50,7 +50,7 @@ paths:
               - desc
           description: |
             Sort order:
-             * `asc` - ASC
+             * `asc` - ASC Order
              * `desc` - DESC
         - in: query
           name: search
