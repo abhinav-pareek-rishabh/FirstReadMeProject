@@ -48,8 +48,8 @@ paths:
               - desc
           description: |
             Sort order:
-             * `asc` - Ascending
-             * `desc` - Descending
+             * `asc` - ASC
+             * `desc` - DESC
         - in: query
           name: search
           schema:
