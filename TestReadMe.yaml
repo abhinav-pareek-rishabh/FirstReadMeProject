@@ -59,7 +59,7 @@ paths:
             default: null
           description: >
             Available search fields:
-             * `name`  - It takes String value.
+             * `name`  - It takes name as String value.
              * `group_uuid`  - It takes String value.
              * `update_stamp`  - It takes Integer value. <br>
             For further RSQL query options, please visit https://github.com/jirutka/rsql-parser#examples
