@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Media Owner Full-Stack API
-  version: 1.0.87
+  version: v1.0
 
 servers:
   - url: 'https://www.test.com'
