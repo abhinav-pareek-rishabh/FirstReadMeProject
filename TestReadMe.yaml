@@ -51,6 +51,7 @@ paths:
           description: |
             Sort order:
              * `asc` - ASC Order
+             * `desc` - DESC Order
         - in: query
           name: search
           schema:
