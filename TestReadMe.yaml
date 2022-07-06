@@ -1,0 +1,347 @@
+openapi: 3.0.1
+info:
+  title: Media Owner Full-Stack API
+  version: V1.0
+servers:
+  - url: https://www.testreadme.com
+    description: Test Server
+paths:
+  /groups:
+    get:
+      operationId: getAllGroups
+      tags:
+        - Group
+      summary: Get Group
+      description: Returns list of Group
+      parameters:
+        - in: header
+          name: env
+          schema:
+            type: string
+          required: true
+          description: Market Universal ID of the Tenant
+        - in: query
+          name: pageNo
+          schema:
+            type: integer
+            default: 0
+          description: The requested page number
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 10
+          description: Number of items in the returned page
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            default: id
+          description: Sorted by field
+        - in: query
+          name: sortDir
+          schema:
+            type: string
+            default: asc
+            enum:
+              - asc
+              - desc
+          description: |
+            Sort order:
+             * `asc` - Ascending, from A to Z
+             * `desc` - Descending, from Z to A
+        - in: query
+          name: search
+          schema:
+            type: string
+            default: null
+          description: >
+            Available search fields:
+             * `name`  - It takes String value.
+             * `group_uuid`  - It takes String value.
+             * `update_stamp`  - It takes Integer value. <br>
+            For further RSQL query options, please visit https://github.com/jirutka/rsql-parser#examples
+      security:
+        - bearerAuth:
+            - uid
+      responses:
+        "200":
+          description: Returns requested List of Group
+          headers:
+            TOTAL-PAGE:
+              schema:
+                type: integer
+              description: Total Number of Available Pages
+            SORT-BY:
+              schema:
+                type: string
+              description: Sorted by field
+            SORT-DIR:
+              schema:
+                type: string
+                default: asc
+                enum:
+                  - asc
+                  - desc
+              description: Sort Order
+            TOTAL-ELEMENTS-IN-CURRENT-PAGE:
+              schema:
+                type: integer
+              description: Total number of elements returned in the current page
+            PAGE-SIZE:
+              schema:
+                type: integer
+              description: Number of elements in a page
+            CURRENT-PAGE:
+              schema:
+                type: integer
+              description: The current page index
+            TOTAL-ELEMENTS:
+              schema:
+                type: integer
+              description: The total number of available elements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  group_list:
+                    type: array
+                    items:
+                      $ref: "#/paths/~1groups~1%7Bgroupid%7D/get/responses/200/content/application~1j\
+                        son/schema"
+                    description: List of the Group
+  "/groups/{groupid}":
+    get:
+      operationId: getGroupById
+      tags:
+        - Group
+      summary: Get Group by id
+      description: Returns the Group
+      parameters:
+        - in: header
+          name: env
+          schema:
+            type: string
+          required: true
+          description: Market Universal ID of the Tenant
+        - in: path
+          name: groupid
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          required: true
+          description: Market Universal ID of the Group
+      security:
+        - bearerAuth:
+            - uid
+      responses:
+        "200":
+          description: Returns requested Group
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        minLength: 1
+                        maxLength: 100
+                        description: Name of the Audience Category Group
+                  - properties:
+                      group_id:
+                        type: string
+                        minLength: 1
+                        maxLength: 50
+                        description: Market Universal ID of the Audience Category Group
+                      update_stamp:
+                        type: integer
+                        format: int64
+                        description: Last update stamp of Audience Category
+                  - type: object
+        "400":
+          description: Bad Request, if the request not proper
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                  - error_type
+                  - message
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                  error_type:
+                    type: string
+                    enum:
+                      - DEFAULT
+                      - MISSING_ENVIRONMENT_ID
+                      - INVALID_ENVIRONMENT_ID
+                      - INVALID_REFERENCED_OBJECT
+                      - INVALID_REQUEST_INPUT
+                      - INVALID_PATH_VARIABLE
+                      - DEFAULT_OBJECT_MANIPULATION_NOT_ALLOWED
+                      - INVALID_REQUEST_PARAM
+                      - INVALID_PARENT_REFERENCE
+                  message:
+                    type: string
+              example:
+                code: 2300
+                error_type: INVALID_PATH_VARIABLE
+                message: groupid must be between 1 and 50
+        "404":
+          description: Not Found, if the specified Group could not be found in the system
+    put:
+      operationId: createOrUpdateGroupByID
+      tags:
+        - Group
+      summary: Create Or Update Group
+      description: Create Or Update Group
+      parameters:
+        - in: header
+          name: env-id
+          schema:
+            type: string
+          required: true
+          description: Market Universal ID of the Tenant
+        - in: path
+          name: groupid
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          required: true
+          description: Market Universal ID of the Group
+      security:
+        - bearerAuth:
+            - uid
+      requestBody:
+        description: Group
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/paths/~1groups~1%7Bgroupid%7D/get/responses/200/content/application~1j\
+                    son/schema/allOf/0"
+                - type: object
+                  required:
+                    - name
+            example:
+              name: Males Only
+      responses:
+        "201":
+          description: Created if the Group not existing before and created successfully
+        "204":
+          description: No Content if the Group existing before and created successfully
+        "400":
+          description: Bad Request, if the request not proper
+          content:
+            application/json:
+              schema:
+                $ref: "#/paths/~1groups~1%7Bgroupid%7D/get/responses/400/content/application~1j\
+                  son/schema"
+              example:
+                code: 2300
+                error_type: INVALID_PATH_VARIABLE
+                message: groupid must be between 1 and 50
+    patch:
+      operationId: partialUpdateGroupByUUID
+      tags:
+        - Group
+      summary: Partial Update Group
+      description: Partial Update Group
+      parameters:
+        - in: header
+          name: env-id
+          schema:
+            type: string
+          required: true
+          description: Market Universal ID of the Tenant
+        - in: path
+          name: groupid
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          required: true
+          description: Market Universal ID of the Group
+      security:
+        - bearerAuth:
+            - uid
+      requestBody:
+        description: Group
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/paths/~1groups~1%7Bgroupid%7D/get/responses/200/content/application~1j\
+                    son/schema/allOf/0"
+                - type: object
+      responses:
+        "204":
+          description: No Content if the Group updated successfully
+        "400":
+          description: Bad Request, if the request not proper
+          content:
+            application/json:
+              schema:
+                $ref: "#/paths/~1groups~1%7Bgroupid%7D/get/responses/400/content/application~1j\
+                  son/schema"
+              example:
+                code: 2300
+                error_type: INVALID_PATH_VARIABLE
+                message: groupid must be between 1 and 50
+        "404":
+          description: Not Found, if the specified Group could not be found in the system
+    delete:
+      operationId: deleteGroupByUUID
+      tags:
+        - Group
+      summary: Delete Group by groupid
+      description: Sets the Group to be inactive
+      parameters:
+        - in: header
+          name: env-id
+          schema:
+            type: string
+          required: true
+          description: Market Universal ID of the Tenant
+        - in: path
+          name: groupid
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          required: true
+          description: Market Universal ID of the Group
+      security:
+        - bearerAuth:
+            - uid
+      responses:
+        "204":
+          description: No Content if the Group deleted successfully
+        "400":
+          description: Bad Request, if the request not proper
+          content:
+            application/json:
+              schema:
+                $ref: "#/paths/~1groups~1%7Bgroupid%7D/get/responses/400/content/application~1j\
+                  son/schema"
+              example:
+                code: 2300
+                error_type: INVALID_PATH_VARIABLE
+                message: groupid must be between 1 and 50
+        "404":
+          description: Not Found, if the specified Group could not be found in the system
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
